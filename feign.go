@@ -1,0 +1,98 @@
+package hapi
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"hgenid"
+	"hhttp"
+	"io/ioutil"
+	"net/http"
+	"strings"
+)
+
+type Error500 struct {
+	Errno string `json:"errno"`
+	Error string `json:"error"`
+}
+
+func Post(ctx context.Context, url string, body string) ([]byte, error) {
+	request, err := http.NewRequest("POST", url, strings.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	var client = hhttp.Client()
+
+	if ctx != nil {
+		appid := ctx.Value("appid")
+		if appid != nil && appid != "" {
+			request.Header.Set("appid", appid.(string))
+		}
+		ctxClient := ctx.Value("client")
+		if ctxClient != nil {
+			client = ctxClient.(*http.Client)
+		}
+	}
+
+	// ctx 不等于空时，读取header与client
+	if ctx != nil {
+		ctxTrack := ctx.Value("track")
+		var track *Track
+		if ctxTrack != nil {
+			track = ctxTrack.(*Track)
+		} else {
+			track = &Track{
+				Sid: hgenid.UUID(),
+				Pid: hgenid.UUID(),
+			}
+		}
+		request.Header.Set("sid", track.Sid)
+		request.Header.Set("pid", track.Tid)
+	}
+	request.Header.Set("tid", hgenid.UUID())
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode == 200 {
+		return ioutil.ReadAll(response.Body)
+	}
+	if response.StatusCode == 500 {
+		bytes, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return nil, err
+		}
+		var e500 *Error500
+		err = json.Unmarshal(bytes, &e500)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(e500.Errno + ":" + e500.Error)
+	}
+	return nil, errors.New("99999:HTTP异常(" + response.Status + ")，请检查业务服务 POST " + url)
+}
+
+func Do(ctx context.Context, method string, body string) ([]byte, error) {
+	if method == "" {
+		return nil, errors.New("接口名称不能为空")
+	}
+	name := strings.Split(method, ".")[1]
+	if method[0:1] != "/" {
+		method = "/" + method
+	}
+	url := "http://" + name + method
+	return Post(ctx, url, body)
+}
+
+func Call(ctx context.Context, method string, i interface{}, o interface{}) (err error) {
+	bytes, err := json.Marshal(i)
+	if err != nil {
+		return err
+	}
+	resp, err := Do(ctx, method, string(bytes))
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp, o)
+	return err
+}
