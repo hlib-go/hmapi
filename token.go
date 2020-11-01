@@ -3,6 +3,7 @@ package hapi
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
+	"hapi/hm"
 	"hgenid"
 	"hredis"
 )
@@ -45,7 +46,7 @@ func (t *token) Get(token string) (uid string) {
 func (t *token) Verify(token, uid string) error {
 	v := t.Kv.Get(context.Background(), token)
 	if v == "" || v != uid {
-		return E99911
+		return hm.E99911
 	}
 	return nil
 }

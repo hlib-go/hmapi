@@ -1,4 +1,4 @@
-package hapi
+package feign
 
 import (
 	"context"
@@ -32,22 +32,6 @@ func Post(ctx context.Context, url string, body string) ([]byte, error) {
 		if ctxClient != nil {
 			client = ctxClient.(*http.Client)
 		}
-	}
-
-	// ctx 不等于空时，读取header与client
-	if ctx != nil {
-		ctxTrack := ctx.Value("track")
-		var track *Track
-		if ctxTrack != nil {
-			track = ctxTrack.(*Track)
-		} else {
-			track = &Track{
-				Sid: hgenid.UUID(),
-				Pid: hgenid.UUID(),
-			}
-		}
-		request.Header.Set("sid", track.Sid)
-		request.Header.Set("pid", track.Tid)
 	}
 	request.Header.Set("tid", hgenid.UUID())
 	response, err := client.Do(request)

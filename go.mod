@@ -11,7 +11,7 @@ require (
 )
 
 replace (
-	hgenid v0.0.0 => gitee.com/hlib-go/hgenid v0.0.0-20201010154643-5bb5cd815855
-	hhttp v0.0.0 => gitee.com/hlib-go/hhttp v0.0.0-20201010155030-030f71f1769e
-	hredis v0.0.0 => gitee.com/hlib-go/hredis v0.0.0-20201009152956-4faca4c92a1b
+	hgenid v0.0.0 => github.com/hlib-go/hgenid v0.0.0-20201010154643-5bb5cd815855
+	hhttp v0.0.0 => github.com/hlib-go/hhttp v0.0.0-20201010155030-030f71f1769e
+	hredis v0.0.0 => github.com/hlib-go/hredis v0.0.0-20201009152956-4faca4c92a1b
 )

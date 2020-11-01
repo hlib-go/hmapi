@@ -1,4 +1,4 @@
-package hapi
+package hm
 
 import (
 	"context"
@@ -12,6 +12,13 @@ import (
 	"strings"
 	"time"
 )
+
+// Token操作接口定义
+type Token interface {
+	Gen(uid string, validSecond int64) (token string, err error)
+	Get(token string) (uid string)
+	Verify(token, uid string) error
+}
 
 var (
 	ERR_HTTP_METHOD = errors.New("99999:请使用HTTP POST请求")
@@ -140,15 +147,15 @@ func DefApi(pattern string, resolve func(p *ResolveParams) (out interface{}, err
 }
 
 // 接口请求Model
-type RequestHeader struct {
+/*type RequestHeader struct {
 	Appid      string `json:"appid"`
 	Method     string `json:"method"`
 	RequestId  string `json:"requestId"`
 	SubmitTime string `json:"submitTime"`
-}
+}*/
 
 // 接口响应 Model
-type ResponseHeader struct {
+/*type ResponseHeader struct {
 	Errno      string `json:"errno"`
 	Error      string `json:"error"`
 	HostTime   string `json:"hostTime"`
@@ -157,4 +164,4 @@ type ResponseHeader struct {
 	Method     string `json:"method"`
 	RequestId  string `json:"requestId"`
 	SubmitTime string `json:"submitTime"`
-}
+}*/

@@ -1,4 +1,4 @@
-package hapi
+package hm
 
 // 全局错误码定义
 // 999**
