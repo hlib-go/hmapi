@@ -17,6 +17,12 @@ var (
 	ERR_HTTP_METHOD = errors.New("99999:请使用HTTP POST请求")
 )
 
+type Token interface {
+	Gen(uid string, validSecond int64) (token string, err error)
+	Get(token string) (uid string)
+	Verify(token, uid string) error
+}
+
 type ResolveParams struct {
 	Context context.Context
 	Request *http.Request
