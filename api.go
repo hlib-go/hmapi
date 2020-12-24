@@ -1,4 +1,4 @@
-package hm
+package hmapi
 
 import (
 	"context"
@@ -13,67 +13,9 @@ import (
 	"time"
 )
 
-// Token操作接口定义
-type Token interface {
-	Gen(uid string, validSecond int64) (token string, err error)
-	Get(token string) (uid string)
-	Verify(token, uid string) error
-}
-
 var (
 	ERR_HTTP_METHOD = errors.New("99999:请使用HTTP POST请求")
 )
-
-func ResponseSuccess(i interface{}) []byte {
-	suc := fmt.Sprintf(`{"errno":"%s","error":"%s"}`, SUCCESS.Code, SUCCESS.Msg)
-	if i == nil {
-		return []byte(suc)
-	}
-	bytes, err := json.Marshal(i)
-	if err != nil {
-		panic(err)
-	}
-	if len(bytes) > 2 {
-		bytes = append([]byte(suc[0:len(suc)-1]+","), bytes[1:]...)
-	} else {
-		bytes = []byte(suc)
-	}
-	return bytes
-}
-
-func ResponseFail(err error) []byte {
-	msg := err.Error()
-	if msg[5:6] == ":" {
-		return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s"}`, msg[0:5], msg[6:]))
-	} else {
-		return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s"}`, "99999", msg))
-	}
-}
-
-func ResponseWriter(writer http.ResponseWriter, status int, content []byte) {
-	if status != 200 {
-		writer.WriteHeader(status)
-	}
-	writer.Write(content)
-}
-
-func post(handle http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json;charset=utf-8")
-		if strings.ToUpper(request.Method) != "POST" {
-			ResponseWriter(writer, 500, ResponseFail(ERR_HTTP_METHOD))
-			return
-		}
-		handle.ServeHTTP(writer, request)
-	})
-}
-
-// 服务调用轨迹记录
-type Track struct {
-	Sid string `json:"sid" description:"会话编号"`
-	Pid string `json:"pid" description:"上级编号"`
-	Tid string `json:"tid" description:"交易编号"`
-}
 
 type ResolveParams struct {
 	Context context.Context
@@ -144,6 +86,57 @@ func DefApi(pattern string, resolve func(p *ResolveParams) (out interface{}, err
 		hlog.WithField("responseBody", string(resBytes)).Info("响应报文")
 		ResponseWriter(writer, 200, resBytes)
 	})))
+}
+
+func ResponseSuccess(i interface{}) []byte {
+	suc := fmt.Sprintf(`{"errno":"%s","error":"%s"}`, SUCCESS.Code, SUCCESS.Msg)
+	if i == nil {
+		return []byte(suc)
+	}
+	bytes, err := json.Marshal(i)
+	if err != nil {
+		panic(err)
+	}
+	if len(bytes) > 2 {
+		bytes = append([]byte(suc[0:len(suc)-1]+","), bytes[1:]...)
+	} else {
+		bytes = []byte(suc)
+	}
+	return bytes
+}
+
+func ResponseFail(err error) []byte {
+	msg := err.Error()
+	if msg[5:6] == ":" {
+		return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s"}`, msg[0:5], msg[6:]))
+	} else {
+		return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s"}`, "99999", msg))
+	}
+}
+
+func ResponseWriter(writer http.ResponseWriter, status int, content []byte) {
+	if status != 200 {
+		writer.WriteHeader(status)
+	}
+	writer.Write(content)
+}
+
+func post(handle http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json;charset=utf-8")
+		if strings.ToUpper(request.Method) != "POST" {
+			ResponseWriter(writer, 500, ResponseFail(ERR_HTTP_METHOD))
+			return
+		}
+		handle.ServeHTTP(writer, request)
+	})
+}
+
+// 服务调用轨迹记录
+type Track struct {
+	Sid string `json:"sid" description:"会话编号"`
+	Pid string `json:"pid" description:"上级编号"`
+	Tid string `json:"tid" description:"交易编号"`
 }
 
 // 接口请求Model

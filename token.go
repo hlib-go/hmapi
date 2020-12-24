@@ -1,29 +1,28 @@
-package hapi
+package hmapi
 
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
-	"hapi/hm"
-	"hgenid"
-	"hredis"
+	"github.com/hlib-go/hgenid"
+	"github.com/hlib-go/hredis"
 )
-
-// hb/hc   接口token设置与校验
-// 使用Redis存储Token，初始加载时创建
-func NewTokenRedis(client *redis.Client) Token {
-	return &token{
-		Kv: &hredis.Kv{
-			KeyPre: "token:", //用户会话Token ,key为token:uuid   value为用户id
-			Client: client,
-		},
-	}
-}
 
 // Token操作接口定义
 type Token interface {
 	Gen(uid string, validSecond int64) (token string, err error)
 	Get(token string) (uid string)
 	Verify(token, uid string) error
+}
+
+// hb/hc   接口token设置与校验
+// 使用Redis存储Token，初始加载时创建
+func NewToken(client *redis.Client) Token {
+	return &token{
+		Kv: &hredis.Kv{
+			KeyPre: "token:", //用户会话Token ,key为token:uuid   value为用户id
+			Client: client,
+		},
+	}
 }
 
 type token struct {
@@ -46,7 +45,7 @@ func (t *token) Get(token string) (uid string) {
 func (t *token) Verify(token, uid string) error {
 	v := t.Kv.Get(context.Background(), token)
 	if v == "" || v != uid {
-		return hm.E99911
+		return E99911
 	}
 	return nil
 }

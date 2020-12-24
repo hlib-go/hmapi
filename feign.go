@@ -1,15 +1,20 @@
-package feign
+package hmapi
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"hgenid"
-	"hhttp"
+	"github.com/hlib-go/hgenid"
+	"github.com/hlib-go/hhttp"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
+
+// 内网调用接口
+/*type Feign interface {
+	Do(ctx context.Context, method string, body interface{}, result interface{}) (err error)
+}*/
 
 type Error500 struct {
 	Errno string `json:"errno"`
