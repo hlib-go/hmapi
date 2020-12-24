@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hlib-go/hmapi/errs"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -95,7 +96,7 @@ func DefApi(pattern string, resolve func(p *ResolveParams) (out interface{}, err
 }
 
 func ResponseSuccess(i interface{}) []byte {
-	suc := fmt.Sprintf(`{"errno":"%s","error":"%s"}`, SUCCESS.Code, SUCCESS.Msg)
+	suc := fmt.Sprintf(`{"errno":"%s","error":"%s"}`, errs.SUCCESS.Code, errs.SUCCESS.Msg)
 	if i == nil {
 		return []byte(suc)
 	}
