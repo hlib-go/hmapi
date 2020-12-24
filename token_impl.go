@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/hlib-go/hmapi/errs"
 	"github.com/hlib-go/hredis"
 )
 
@@ -40,7 +41,7 @@ func (t *token) Get(token string) (uid string) {
 func (t *token) Verify(token, uid string) error {
 	v := t.Kv.Get(context.Background(), token)
 	if v == "" || v != uid {
-		return E99911
+		return errs.E99911
 	}
 	return nil
 }

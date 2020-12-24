@@ -1,4 +1,4 @@
-package hmapi
+package errs
 
 import (
 	"encoding/json"
