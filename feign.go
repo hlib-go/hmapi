@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/hlib-go/hgenid"
 	"github.com/hlib-go/hhttp"
 	"io/ioutil"
 	"net/http"
@@ -38,7 +37,7 @@ func Post(ctx context.Context, url string, body string) ([]byte, error) {
 			client = ctxClient.(*http.Client)
 		}
 	}
-	request.Header.Set("tid", hgenid.UUID())
+	request.Header.Set("tid", Rand32())
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err

@@ -2,8 +2,10 @@ package hmapi
 
 import (
 	"context"
+	"crypto/md5"
+	"crypto/rand"
+	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/hlib-go/hgenid"
 	"github.com/hlib-go/hredis"
 )
 
@@ -31,7 +33,7 @@ type token struct {
 
 //生成token
 func (t *token) Gen(uid string, validSecond int64) (token string, err error) {
-	token = hgenid.UUID()
+	token = Rand32()
 	err = t.Kv.Set(context.Background(), token, uid, validSecond)
 	return
 }
@@ -48,4 +50,13 @@ func (t *token) Verify(token, uid string) error {
 		return E99911
 	}
 	return nil
+}
+
+// Rand32 使用crypto/rand 随机赋值byte数组， 然后md5返回32位十六进制字符串
+func Rand32() string {
+	var b = make([]byte, 48)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x", md5.Sum(b))
 }
