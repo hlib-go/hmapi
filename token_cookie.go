@@ -29,6 +29,11 @@ type TokenCookie struct {
 
 // 生成 Token
 func GenToken(uid, mobile string, second int64) (token string) {
+	defer func() {
+		if e := recover(); e != nil {
+			token = "gen-token-error"
+		}
+	}()
 	tc := &TokenCookie{
 		Uid:     uid,
 		Mobile:  mobile,
@@ -44,6 +49,11 @@ func GenToken(uid, mobile string, second int64) (token string) {
 
 // 验证 Token
 func VerToken(token string) (t *TokenCookie, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = errs.E99911
+		}
+	}()
 	src, err := DES_ECB_PKCS5_Decode(token, h_token_secret)
 	if err != nil {
 		return
@@ -60,53 +70,6 @@ func VerToken(token string) (t *TokenCookie, err error) {
 	}
 	return
 }
-
-// 生成token
-// @deprecated
-/*func GenToken(uid string, expiresTime int64) (token string) {
-	src := uid + "&" + time.Now().Add(time.Duration(expiresTime)*time.Second).Format(time.RFC3339)
-	token, err := DES_ECB_PKCS5_Encode(src, token_secret)
-	if err != nil {
-		log.Error("GenToken->", err.Error())
-	}
-	return
-}*/
-
-// 校验token
-// @deprecated
-/*func VerToken(token string) (uid string, err error) {
-	defer func() {
-		if err != nil {
-			log.Error("VerifyOauthToken Error:" + err.Error())
-			err = errs.E99911
-		}
-	}()
-	src, err := DES_ECB_PKCS5_Decode(token, token_secret)
-	if err != nil {
-		return
-	}
-	ts := strings.Split(src, "&")
-	if len(ts) != 2 {
-		err = errs.E99911
-		return
-	}
-	uid = ts[0]
-	if uid == "" {
-		err = errs.E99911
-		return
-	}
-
-	// 是否超时
-	t, err := time.Parse(time.RFC3339, ts[1])
-	if err != nil {
-		return
-	}
-	if time.Now().After(t) {
-		err = errs.E99911
-		return
-	}
-	return
-}*/
 
 // DES_ECB_PKCS5_Encode
 func DES_ECB_PKCS5_Encode(src, key string) (v string, err error) {
