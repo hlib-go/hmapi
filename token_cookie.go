@@ -56,10 +56,12 @@ func VerToken(token string) (t *TokenCookie, err error) {
 	}()
 	src, err := DES_ECB_PKCS5_Decode(token, h_token_secret)
 	if err != nil {
+		err = errs.E99911
 		return
 	}
 	err = json.Unmarshal([]byte(src), &t)
 	if err != nil {
+		err = errs.E99911
 		return
 	}
 	// 验证是否超时
