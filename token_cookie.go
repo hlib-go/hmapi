@@ -4,31 +4,77 @@ import (
 	"bytes"
 	"crypto/des"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"github.com/hlib-go/hmapi/errs"
-	log "github.com/sirupsen/logrus"
-	"strings"
+	"os"
 	"time"
 )
 
-/* 客户端 Cookie 存储密文 token字符串  */
+// 生成密文token字符串的秘钥
+var h_token_secret = "yh9HP7s2"
 
-const (
-	token_secret = "yh2HP7s2"
-)
+func init() {
+	secret := os.Getenv("H_TOKEN_SECRET") // 注意：需所有服务都设置环境变量，否则会导致部分服务token失效
+	if secret != "" && len(secret) == 8 {
+		h_token_secret = secret
+	}
+}
+
+type TokenCookie struct {
+	Uid     string    `json:"uid"`
+	Mobile  string    `json:"mobile"`
+	Expires time.Time `json:"expires"` // 到期时间
+}
+
+// 生成 Token
+func GenToken(uid, mobile string, second int64) (token string) {
+	tc := &TokenCookie{
+		Uid:     uid,
+		Mobile:  mobile,
+		Expires: time.Now().Add(time.Duration(second) * time.Second),
+	}
+	tbytes, _ := json.Marshal(tc)
+	token, err := DES_ECB_PKCS5_Encode(string(tbytes), h_token_secret)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+// 验证 Token
+func VerToken(token string) (t *TokenCookie, err error) {
+	src, err := DES_ECB_PKCS5_Decode(token, h_token_secret)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal([]byte(src), &t)
+	if err != nil {
+		return
+	}
+	// 验证是否超时
+	if time.Now().After(t.Expires) {
+		t = nil
+		err = errs.E99911
+		return
+	}
+	return
+}
 
 // 生成token
-func GenToken(uid string, expiresTime int64) (token string) {
+// @deprecated
+/*func GenToken(uid string, expiresTime int64) (token string) {
 	src := uid + "&" + time.Now().Add(time.Duration(expiresTime)*time.Second).Format(time.RFC3339)
 	token, err := DES_ECB_PKCS5_Encode(src, token_secret)
 	if err != nil {
 		log.Error("GenToken->", err.Error())
 	}
 	return
-}
+}*/
 
 // 校验token
-func VerToken(token string) (uid string, err error) {
+// @deprecated
+/*func VerToken(token string) (uid string, err error) {
 	defer func() {
 		if err != nil {
 			log.Error("VerifyOauthToken Error:" + err.Error())
@@ -60,7 +106,7 @@ func VerToken(token string) (uid string, err error) {
 		return
 	}
 	return
-}
+}*/
 
 // DES_ECB_PKCS5_Encode
 func DES_ECB_PKCS5_Encode(src, key string) (v string, err error) {
