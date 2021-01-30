@@ -5,7 +5,7 @@ import (
 )
 
 func TestPost(t *testing.T) {
-	b, e := Post(nil, "http://himkt.cn", "")
+	b, e := Request(nil, "POST", "http://himkt.cn", "")
 	if e != nil {
 		t.Error(e)
 		return

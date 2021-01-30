@@ -10,24 +10,22 @@ import (
 	"strings"
 )
 
-// 内网调用接口
-/*type Feign interface {
-	Do(ctx context.Context, method string, body interface{}, result interface{}) (err error)
-}*/
-
 type Error500 struct {
 	Errno string `json:"errno"`
 	Error string `json:"error"`
 }
 
-func Post(ctx context.Context, url string, body string) ([]byte, error) {
-	request, err := http.NewRequest("POST", url, strings.NewReader(body))
+func Request(ctx context.Context, method, url string, body string) ([]byte, error) {
+	request, err := http.NewRequest(method, url, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 	var client = hhttp.Client()
 
 	if ctx != nil {
+		if ctx.Value("token") != nil {
+			request.Header.Set("token", ctx.Value("token").(string))
+		}
 		appid := ctx.Value("appid")
 		if appid != nil && appid != "" {
 			request.Header.Set("appid", appid.(string))
@@ -57,7 +55,7 @@ func Post(ctx context.Context, url string, body string) ([]byte, error) {
 		}
 		return nil, errors.New(e500.Errno + ":" + e500.Error)
 	}
-	return nil, errors.New("99999:HTTP异常(" + response.Status + ")，请检查业务服务 POST " + url)
+	return nil, errors.New("99999:HTTP异常(" + response.Status + ")，请检查业务服务 " + method + " " + url)
 }
 
 func Do(ctx context.Context, method string, body string) ([]byte, error) {
@@ -69,7 +67,7 @@ func Do(ctx context.Context, method string, body string) ([]byte, error) {
 		method = "/" + method
 	}
 	url := "http://" + name + method
-	return Post(ctx, url, body)
+	return Request(ctx, "POST", url, body)
 }
 
 func Call(ctx context.Context, method string, i interface{}, o interface{}) (err error) {
@@ -78,6 +76,20 @@ func Call(ctx context.Context, method string, i interface{}, o interface{}) (err
 		return err
 	}
 	resp, err := Do(ctx, method, string(bytes))
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp, o)
+	return err
+}
+
+// 内部接口请求
+func InternalRequest(ctx context.Context, method string, path string, i interface{}, o interface{}) (err error) {
+	bytes, err := json.Marshal(i)
+	if err != nil {
+		return err
+	}
+	resp, err := Request(ctx, method, "http://"+path, string(bytes))
 	if err != nil {
 		return err
 	}
