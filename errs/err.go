@@ -9,8 +9,8 @@ import (
 // 全局错误码定义
 // 999**
 var (
-	SUCCESS = New("00000", "ok")
-	FAIL    = New("99999", "fail")
+	SUCCESS = New("00000", "OK")
+	FAIL    = New("99999", "FAIL")
 
 	E99901 = New("99901", "无效appid")
 	E99902 = New("99902", "解密失败")
