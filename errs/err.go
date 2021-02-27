@@ -10,7 +10,7 @@ import (
 // 999**
 var (
 	SUCCESS = New("00000", "OK")
-	FAIL    = New("99999", "FAIL")
+	FAIL    = New("ERROR", "FAIL")
 
 	E99901 = New("99901", "无效appid")
 	E99902 = New("99902", "解密失败")
