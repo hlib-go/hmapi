@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hlib-go/hmapi/access"
 	"github.com/hlib-go/hmapi/errs"
-	"github.com/hlib-go/hmapi/token"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -26,7 +26,7 @@ type ResolveParams struct {
 	Body      []byte
 	RequestId string
 	Appid     string
-	Token     *token.Object
+	Token     *access.Token
 }
 
 func (p *ResolveParams) BodyUnmarshal(i interface{}) {
@@ -37,8 +37,8 @@ func (p *ResolveParams) BodyUnmarshal(i interface{}) {
 }
 
 // 客户端Token验证
-func (p *ResolveParams) AccessToken() *token.Object {
-	t, err := token.Ver(_options.TokenSecret, p.Request.Header.Get("token"))
+func (p *ResolveParams) AccessToken() *access.Token {
+	t, err := access.Ver(_options.TokenSecret, p.Request.Header.Get("token"))
 	if err != nil {
 		panic(err)
 	}

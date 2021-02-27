@@ -1,4 +1,4 @@
-package token
+package access
 
 import (
 	"bytes"
@@ -17,24 +17,24 @@ var (
 	INVALID_TOKEN = errs.E99911
 )
 
-type Object struct {
+type Token struct {
 	Uid     string    `json:"uid"`
 	Mobile  string    `json:"mobile"`
 	Second  int64     `json:"second"`  // 有效期秒数
 	Expires time.Time `json:"expires"` // 到期时间
 }
 
-func (t *Object) Json() string {
+func (t *Token) Json() string {
 	tbytes, _ := json.Marshal(t)
 	return string(tbytes)
 }
 
-func (t *Object) SetExpires(second int64) *Object {
+func (t *Token) SetExpires(second int64) *Token {
 	t.Expires = time.Now().Add(time.Duration(second) * time.Second)
 	return t
 }
 
-func (t *Object) Gen(secret string) string {
+func (t *Token) Gen(secret string) string {
 	token, err := des_ecb_pkcs5_encode(t.Json(), secret)
 	if err != nil {
 		token = "gen-token-error"
@@ -44,7 +44,7 @@ func (t *Object) Gen(secret string) string {
 }
 
 // 生成 Token
-func Gen(secret string, t *Object) (tokenVal string) {
+func Gen(secret string, t *Token) (tokenVal string) {
 	defer func() {
 		if e := recover(); e != nil {
 			tokenVal = "gen-token-error"
@@ -56,7 +56,7 @@ func Gen(secret string, t *Object) (tokenVal string) {
 }
 
 // 验证 Token
-func Ver(secret, tokenVal string) (t *Object, err error) {
+func Ver(secret, tokenVal string) (t *Token, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Error(e)

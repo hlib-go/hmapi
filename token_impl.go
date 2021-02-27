@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/hlib-go/hmapi/access"
 	"github.com/hlib-go/hmapi/errs"
 	"github.com/hlib-go/hredis"
 )
@@ -43,7 +44,11 @@ type Rtoken struct {
 
 //生成token
 func (t *Rtoken) Gen(uid string, validSecond int64) (token string, err error) {
-	token = Rand32()
+	token = access.Gen("", (&access.Token{
+		Uid:    uid,
+		Mobile: "",
+		Second: validSecond,
+	}).SetExpires(validSecond))
 	err = t.Kv.Set(context.Background(), token, uid, validSecond)
 	return
 }

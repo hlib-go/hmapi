@@ -1,14 +1,14 @@
-package token
+package access
 
 import (
 	"fmt"
 	"testing"
 )
 
-func TestGenToken(t *testing.T) {
+func TestToken(t *testing.T) {
 	secret := "12345678"
 
-	tokenVal := Gen(secret, (&Object{
+	tokenVal := Gen(secret, (&Token{
 		Uid:    "111111111111",
 		Mobile: "1",
 		Second: 10,
