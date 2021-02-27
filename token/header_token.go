@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// HTTP Header 存储密文token
+
 var (
 	INVALID_TOKEN = errs.E99911
 )

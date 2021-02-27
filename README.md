@@ -11,6 +11,7 @@ hmapi
 - 请求报文：appid=xxx&method=hm.xxx.xxx&biz=xxxxx&encrypt=DES_MD5
 - 响应报文：JSON
 
+
 ## 报文加解密
 
 ### 方式1：DES_MD5

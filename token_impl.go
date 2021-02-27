@@ -10,10 +10,26 @@ import (
 	"github.com/hlib-go/hredis"
 )
 
+// 2021.02.27 弃用，改为使用客户端token
+
+type Token interface {
+	Gen(uid string, validSecond int64) (token string, err error)
+	Get(token string) (uid string)
+	Verify(token, uid string) error
+}
+
+// Redis Token验证
+func (p *ResolveParams) VerifyToken(t Token, tokenVal, uidVal string) {
+	err := t.Verify(tokenVal, uidVal)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // hb/hc   接口token设置与校验
 // 使用Redis存储Token，初始加载时创建
 func NewToken(client *redis.Client) Token {
-	return &token{
+	return &Rtoken{
 		Kv: &hredis.Kv{
 			KeyPre: "token:", //用户会话Token ,key为token:uuid   value为用户id
 			Client: client,
@@ -21,24 +37,24 @@ func NewToken(client *redis.Client) Token {
 	}
 }
 
-type token struct {
+type Rtoken struct {
 	Kv *hredis.Kv
 }
 
 //生成token
-func (t *token) Gen(uid string, validSecond int64) (token string, err error) {
+func (t *Rtoken) Gen(uid string, validSecond int64) (token string, err error) {
 	token = Rand32()
 	err = t.Kv.Set(context.Background(), token, uid, validSecond)
 	return
 }
 
 // 根据token获取用户id
-func (t *token) Get(token string) (uid string) {
+func (t *Rtoken) Get(token string) (uid string) {
 	return t.Kv.Get(context.Background(), token)
 }
 
 // 验证token,判断token对应的内容是否等于用户编号
-func (t *token) Verify(token, uid string) error {
+func (t *Rtoken) Verify(token, uid string) error {
 	v := t.Kv.Get(context.Background(), token)
 	if v == "" || v != uid {
 		return errs.E99911

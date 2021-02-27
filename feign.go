@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-type Error500 struct {
-	Errno string `json:"errno"`
-	Error string `json:"error"`
-}
-
 func Request(ctx context.Context, method, url string, body string) ([]byte, error) {
 	request, err := http.NewRequest(method, url, strings.NewReader(body))
 	if err != nil {
@@ -35,27 +30,33 @@ func Request(ctx context.Context, method, url string, body string) ([]byte, erro
 			client = ctxClient.(*http.Client)
 		}
 	}
-	request.Header.Set("tid", Rand32())
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
-	if response.StatusCode == 200 {
+	if response.StatusCode == http.StatusOK {
 		return ioutil.ReadAll(response.Body)
 	}
-	if response.StatusCode == 500 {
-		bytes, err := ioutil.ReadAll(response.Body)
+
+	// HTTP 返回非200状态都为异常
+	bytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	if bytes != nil {
+		var ferr *FeignErr
+		err = json.Unmarshal(bytes, &ferr)
 		if err != nil {
 			return nil, err
 		}
-		var e500 *Error500
-		err = json.Unmarshal(bytes, &e500)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errors.New(e500.Errno + ":" + e500.Error)
+		return nil, errors.New(ferr.Errno + ":" + ferr.Error)
 	}
 	return nil, errors.New("99999:HTTP异常(" + response.Status + ")，请检查业务服务 " + method + " " + url)
+}
+
+type FeignErr struct {
+	Errno string `json:"errno"`
+	Error string `json:"error"`
 }
 
 func Do(ctx context.Context, method string, body string) ([]byte, error) {
