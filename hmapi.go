@@ -58,7 +58,7 @@ func DefApi(pattern string, resolve func(p *ResolveParams) (out interface{}, err
 		defer func() {
 			if e := recover(); e != nil {
 				var err = recoverError(e)
-				resBytes = respFail(err, requestId)
+				resBytes = respFail(err)
 			}
 			hlog.WithField("ms", strconv.FormatInt(time.Now().UnixNano()/1e6-begTime, 10)).Info("响应报文 " + string(resBytes))
 			responseWriter(writer, 200, "application/json;charset=utf-8", resBytes)
@@ -75,7 +75,7 @@ func DefApi(pattern string, resolve func(p *ResolveParams) (out interface{}, err
 		if e != nil {
 			panic(e)
 		}
-		resBytes = respSuccess(i, requestId)
+		resBytes = respSuccess(i)
 	})))
 }
 
@@ -90,15 +90,15 @@ func responseWriter(writer http.ResponseWriter, status int, contentType string, 
 func post(handle http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if strings.ToUpper(request.Method) != "POST" {
-			responseWriter(writer, 500, "application/json;charset=utf-8", respFail(ERR_HTTP_METHOD, "500"))
+			responseWriter(writer, 500, "application/json;charset=utf-8", respFail(ERR_HTTP_METHOD))
 			return
 		}
 		handle.ServeHTTP(writer, request)
 	})
 }
 
-func respSuccess(out interface{}, requestId string) []byte {
-	suc := fmt.Sprintf(`{"errno":"%s","error":"%s","requestId":"%s"}`, errs.SUCCESS.Code, errs.SUCCESS.Msg, requestId)
+func respSuccess(out interface{}) []byte {
+	var suc = fmt.Sprintf(`{"errno":"%s","error":"%s"}`, errs.SUCCESS.Code, errs.SUCCESS.Msg)
 	if out == nil {
 		return []byte(suc)
 	}
@@ -114,13 +114,17 @@ func respSuccess(out interface{}, requestId string) []byte {
 	return bytes
 }
 
-func respFail(err error, requestId string) []byte {
-	msg := err.Error()
-	msgSplit := strings.Split(msg, ":")
-	if msg[5:6] == ":" {
-		return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s","requestId":"%s"}`, msgSplit[0:1], strings.Join(msgSplit[1:], ":"), requestId))
+func respFail(err error) []byte {
+	var (
+		errno = "ERROR"
+		error = err.Error()
+	)
+	es := strings.Split(error, ":")
+	if len(es) > 1 {
+		errno = strings.Join(es[0:1], "")
+		error = strings.Join(es[1:], ":")
 	}
-	return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s","requestId":"%s"}`, "ERROR", msg, requestId))
+	return []byte(fmt.Sprintf(`{"errno":"%s","error":"%s"}`, errno, error))
 }
 
 func recoverError(e interface{}) (err error) {
