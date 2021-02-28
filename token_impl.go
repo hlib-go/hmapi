@@ -6,9 +6,9 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/hlib-go/hmapi/access"
 	"github.com/hlib-go/hmapi/errs"
 	"github.com/hlib-go/hredis"
+	"github.com/hlib-go/htoken"
 )
 
 // 2021.02.27 弃用，改为使用客户端token
@@ -44,7 +44,7 @@ type Rtoken struct {
 
 //生成token
 func (t *Rtoken) Gen(uid string, validSecond int64) (token string, err error) {
-	token = access.Gen("", (&access.Token{
+	token = htoken.Gen(_options.TokenSecret, (&htoken.Token{
 		Uid:    uid,
 		Mobile: "",
 		Second: validSecond,
