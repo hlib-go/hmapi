@@ -1,5 +1,11 @@
 # Change log
 
+## v0.1.1
+
+    [ Release Date: 2021-03-07 ]
+
+- [feature] 使用appid做desmd5加密
+
 ## v0.1.0
 
     [ Release Date: 2021-02-27 ]

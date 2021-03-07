@@ -23,6 +23,8 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.4 h1:L8R9j+yAqZuZjsqh/z+F1NCffTKKLShY6zXTItVIZ8M=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/hlib-go/hdesmd5 v1.0.0 h1:JPM79hiToFv7snfFNkKHrLQW8Or6SBBxLGVesyhpkDU=
+github.com/hlib-go/hdesmd5 v1.0.0/go.mod h1:p/knqPGb2vfSephbvsP0dMUScwjqb/avQ+shIIIYl6Q=
 github.com/hlib-go/hhttp v0.0.0-20201224073834-383b8d1bedf7 h1:0EV5zy8ObPZmnruFMKnDEyjZuTO8mbXNavIgS2PbZEk=
 github.com/hlib-go/hhttp v0.0.0-20201224073834-383b8d1bedf7/go.mod h1:OUZJrYPyAojBI0ZYGjlKvH8iuk9L/MUwNlNrcdRo+M8=
 github.com/hlib-go/hredis v0.0.0-20201224092145-30afcd745eec h1:1t/cmER73jtgX3i41QRqlKd9BiAs5dcKvvO2yr0SApE=
