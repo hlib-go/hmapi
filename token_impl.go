@@ -44,11 +44,14 @@ type Rtoken struct {
 
 //生成token
 func (t *Rtoken) Gen(uid string, validSecond int64) (token string, err error) {
-	token = htoken.Gen(_options.TokenSecret, (&htoken.Token{
+	token, err = htoken.Gen(_options.TokenSecret, (&htoken.Token{
 		Uid:    uid,
 		Mobile: "",
 		Second: validSecond,
 	}).SetExpires(validSecond))
+	if err != nil {
+		return
+	}
 	err = t.Kv.Set(context.Background(), token, uid, validSecond)
 	return
 }
