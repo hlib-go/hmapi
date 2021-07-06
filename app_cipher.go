@@ -2,6 +2,7 @@ package hmapi
 
 import (
 	"context"
+	"github.com/hlib-go/hmapi/errs"
 	"sync"
 )
 
@@ -10,6 +11,10 @@ var (
 )
 
 func GetOpenApp(appid string, readCache bool) (r *HmOpenAppCryptoResult, err error) {
+	if appid == "" {
+		err = errs.E99901
+		return
+	}
 	if readCache {
 		value, ok := _apps.Load(appid)
 		if ok {
@@ -36,11 +41,21 @@ type HmOpenAppCryptoParams struct {
 }
 
 type HmOpenAppCryptoResult struct {
-	RequestId string `json:"requestId"`
-	Appid     string `json:"appid"`
-	Name      string `json:"name"`
-	DesKey    string `json:"desKey"`
-	AesKey    string `json:"aesKey"`
-	RsaPubKey string `json:"rsaPubKey"`
-	RsaPriKey string `json:"rsaPriKey"`
+	RequestId string     `json:"requestId"`
+	Appid     string     `json:"appid"`
+	Name      string     `json:"name"`
+	DesKey    string     `json:"desKey"`
+	AesKey    string     `json:"aesKey"`
+	RsaPubKey string     `json:"rsaPubKey"`
+	RsaPriKey string     `json:"rsaPriKey"`
+	Version   AppVersion `json:"version"`
+	MerPubKey string     `json:"merPubKey"`
 }
+
+type AppVersion string
+
+const (
+	APP_CEYPT_V1 AppVersion = "v1" // des +md5
+	APP_CEYPT_V2 AppVersion = "v2" // aes + rsa
+	APP_CEYPT_V3 AppVersion = "v3" // des+sha1+rsa
+)
