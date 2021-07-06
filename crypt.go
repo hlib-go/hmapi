@@ -31,12 +31,14 @@ func BizEncode(appid, biz string) (v string, err error) {
 	return
 }
 
+var _rc = make(map[string]bool)
+
 // BizDecode 报文解密
 func BizDecode(appid, biz string) (v string, err error) {
 	if biz == "" {
 		return
 	}
-	app, err := GetOpenApp(appid, true)
+	app, err := GetOpenApp(appid, !_rc[appid])
 	if err != nil {
 		return
 	}
@@ -50,8 +52,10 @@ func BizDecode(appid, biz string) (v string, err error) {
 	default:
 		v, err = v1.DeDesMd5(biz, app.DesKey)
 	}
-	if err != nil {
-		return
+	if err != nil && !_rc[appid] {
+		_rc[appid] = true
+		v, err = BizDecode(appid, biz)
+		_rc[appid] = false
 	}
 	return
 }

@@ -47,8 +47,19 @@ func TestBizEncodeV3(t *testing.T) {
 	t.Log(v)
 }
 
+func TestBizEncodeTV3(t *testing.T) {
+	biz := "`123"
+	v, err := BizEncodeT("10000311", biz)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(v)
+}
+
 func TestBizDecodeV3(t *testing.T) {
-	v, err := BizDecode("12345678", "000")
+	biz := "KpaB5dRtjyyJvnlMZmudug==:31dc75991163b53896f3b1caf43732737546f2a3:eFFOPF09UIMLAU7Onuy8Q/VHH8gAcnllAQvoLjHKOit0lHUlcLkr4Qmc9n+SLbWtjFReZ5eTlfuflGzfqoKACjEEqYM8upDxjmaZMl6xP7lOgPm9fBcXvKJASPOGbZt00hJEcgp42vtoBN9CggI1Gmv/nBOSsZM3D8gMn0axW2U="
+	v, err := BizDecode("10000311", biz)
 	if err != nil {
 		t.Error(err)
 		return
