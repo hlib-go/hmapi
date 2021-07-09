@@ -96,16 +96,18 @@ func BizDecodeT(appid, biz string) (v string, err error) {
 	}
 	switch app.Version {
 	case APP_CEYPT_V3:
-		v, err = v3.Encode(biz, app.RsaPriKey) // 商户私钥解密
+		v, err = v3.Decode(biz, app.RsaPriKey) // 商户私钥解密
 	case APP_CEYPT_V2:
-		v, err = v2.EnAesRsa(v, app.RsaPriKey) // 商户私钥解密
+		v, err = v2.DeAesRsa(v, app.RsaPriKey) // 商户私钥解密
 	case APP_CEYPT_V1:
-		v, err = v1.EnDesMd5(biz, app.DesKey)
+		v, err = v1.DeDesMd5(biz, app.DesKey)
 	default:
-		v, err = v1.EnDesMd5(biz, app.DesKey)
+		v, err = v1.DeDesMd5(biz, app.DesKey)
 	}
-	if err != nil {
-		return
+	if err != nil && !_rc[appid] {
+		_rc[appid] = true
+		v, err = BizDecodeT(appid, biz)
+		_rc[appid] = false
 	}
 	return
 }
