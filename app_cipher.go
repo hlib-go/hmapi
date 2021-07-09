@@ -50,6 +50,7 @@ type HmOpenAppCryptoResult struct {
 	RsaPriKey string     `json:"rsaPriKey"`
 	Version   AppVersion `json:"version"`
 	MerPubKey string     `json:"merPubKey"`
+	MerPriKey string     `json:"merPriKey"`
 }
 
 type AppVersion string

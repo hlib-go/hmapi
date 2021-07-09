@@ -84,3 +84,28 @@ func BizEncodeT(appid, biz string) (v string, err error) {
 	}
 	return
 }
+
+// BizDecodeT 报文解密
+func BizDecodeT(appid, biz string) (v string, err error) {
+	if biz == "" {
+		return
+	}
+	app, err := GetOpenApp(appid, true)
+	if err != nil {
+		return
+	}
+	switch app.Version {
+	case APP_CEYPT_V3:
+		v, err = v3.Encode(biz, app.RsaPriKey) // 商户私钥解密
+	case APP_CEYPT_V2:
+		v, err = v2.EnAesRsa(v, app.RsaPriKey) // 商户私钥解密
+	case APP_CEYPT_V1:
+		v, err = v1.EnDesMd5(biz, app.DesKey)
+	default:
+		v, err = v1.EnDesMd5(biz, app.DesKey)
+	}
+	if err != nil {
+		return
+	}
+	return
+}
