@@ -96,9 +96,9 @@ func BizDecodeT(appid, biz string) (v string, err error) {
 	}
 	switch app.Version {
 	case APP_CEYPT_V3:
-		v, err = v3.Decode(biz, app.RsaPriKey) // 商户私钥解密
+		v, err = v3.Decode(biz, app.MerPriKey) // 商户私钥解密
 	case APP_CEYPT_V2:
-		v, err = v2.DeAesRsa(v, app.RsaPriKey) // 商户私钥解密
+		v, err = v2.DeAesRsa(v, app.MerPriKey) // 商户私钥解密
 	case APP_CEYPT_V1:
 		v, err = v1.DeDesMd5(biz, app.DesKey)
 	default:
