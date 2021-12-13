@@ -15,6 +15,8 @@ func Request(ctx context.Context, method, url string, body string) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
+	request.Header.Set("Content-Type", "application/json")
+
 	var client = hhttp.Client()
 
 	if ctx != nil {
